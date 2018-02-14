@@ -1,0 +1,350 @@
+PARSER_BEGIN(Lugosi)
+import java.io.*;
+import java.util.ArrayList;
+
+//Declaração das classes auxiliares para a análise
+
+class ArvoreLugosi{
+	Main main;
+	ArrayList <Func> funcs;
+}
+
+class Main{
+	ArrayList <VarDecl> VarDecls;
+	ArrayList <Comando> Comandos;
+}
+
+class VarDecl{
+	Tipo tipo;
+	String id;
+}
+
+class Tipo{}
+class Int extends Tipo{}
+class Bool extends Tipo{}
+class Comando{}
+
+class Atribuicao extends Comando{
+	String id;
+	Exp exp;
+}
+
+class Funcao extends Comando{
+	String id;
+	ArrayList<Exp> arrayExp;
+}
+
+class IF extends Comando{
+	Exp exp;
+	ArrayList <Comando> comandos;
+}
+
+class While extends Comando{
+	Exp exp;
+	ArrayList <Comando> comandos;
+}
+
+class doWhile extends Comando{
+	Exp exp;
+	ArrayList <Comando> comandos;
+}
+
+class Return extends Comando{
+	Exp exp;
+}
+
+class Print extends Comando{
+	Exp exp;
+}
+
+//Essas classe não sei implementar ou não sei se estão bem implementadas
+
+class Exp{}
+
+class Fator extends Exp{
+	String id;
+	ArrayList<Exp> exp;
+}
+
+class ExpOp extends Exp{
+	String Op;
+	Exp e1, e2;
+}
+
+class Func{
+	Tipo tipo;
+	String id;
+	ListaArg listaargs;
+	ArrayList <VarDecl> vardecls;
+	ArrayList <Comando> comandos;
+}
+
+class ListaArg{
+	ArrayList<Tipo> tipos;
+	ArrayList<String> ids;
+}
+
+
+class Lugosi {
+	public static void main(String args[]) throws Exception{
+		
+		// abrir o arquivo passado por linha
+		// de comando contento o código em Lugosi:
+		FileInputStream fs = new FileInputStream(new File(args[0]));
+		
+		// Instanciar o parser da linguagem Lugosi passando
+		// como argumento o arquivo contendo o código
+		//Lugosi a ser processado:
+		Lugosi parser = new Lugosi(fs);
+		
+		// Chamar a primeira regra do parser que irá
+		// analisar o código e devolver a árvore sintática
+		ArvoreLugosi arvore = parser.Lugosi();
+
+		// Passar a árvore para o prety printer:
+		//pprint(arvore);
+		
+		// passar a árvore para o gerador de código
+		//geraCodigo(arvore);
+	}
+	 static void pprint(ArvoreLugosi prog){}
+	 static void geraCodigo(ArvoreLugosi prog){}
+}
+
+
+PARSER_END(Lugosi)
+
+SKIP :
+{
+  " "
+| "\t"
+| "\n"
+| "\r"
+}
+
+//Convenções léxicas
+String TOKEN_id():
+{String t; Token s;}
+{
+	s = <LETRA> (Letraoudigito())? (Finalsublinhado())?
+	{t = (String)s.image; return t;}
+}
+
+String TOKEN_numliteral():
+{String t, s, h, i;}
+{
+	s = Digitos() h = Facao_opcional() i = Expoente_opcional()
+	{t = s + h + i; return t;}
+}
+
+TOKEN :
+{
+  <LETRA: ["a" - "z", "A" - "Z"]>
+|
+  <DIGITO: ["0" - "9"]>  
+}
+
+String Digitos():
+{String t =  new String(); Token s;}
+{
+	(s = <DIGITO> {t += s.image;})+
+	{return t;}
+}
+
+String Facao_opcional():
+{String t = null, g;Token c;}
+{
+	(c = "." g = Digitos(){t = c.image + g;})?
+	{return t;}
+}
+
+
+String Expoente_opcional():
+{String t = null, c; Token a =  new Token(),b = new Token();}
+{
+	(a = "E" (b = "+" | b = "-")? c = Digitos(){t = a.image + b.image + c;})?
+	{return t;}
+}
+
+String Letraoudigito():
+{Token s;}
+{
+	s = <LETRA> | s = <DIGITO>
+	{return s.image;}
+}
+
+String Finalsublinhado():
+{String t, s; Token c;}
+{
+	c = "_" {t = c.image;}(s = Letraoudigito(){t += s;})+
+	{return t;}
+}
+
+//Regras da gramática
+
+ArvoreLugosi Lugosi():
+{ArvoreLugosi ar = new ArvoreLugosi(); Func f;}
+{
+	ar.main = Main() (f =  Func(){ar.funcs.add(f);})?
+	{return ar;}
+}
+
+Main Main():
+{Main m = new Main();}
+{
+	"main" "{" m.VarDecls = VarDecl() m.Comandos = Sequcomandos() "}"
+	{return m;}
+
+}
+
+ArrayList<VarDecl> VarDecl():
+{ArrayList<VarDecl> vars = new ArrayList<VarDecl>(), varReturn = null; VarDecl v = new VarDecl();}
+{
+	("var" v.tipo = Tipo() v.id = TOKEN_id() {vars.add(v);} ";" varReturn = VarDecl())? 
+	
+	{if(varReturn != null){
+		for(int i=0; i<varReturn.size();i++){
+			vars.add(varReturn.get(i));
+		}
+		}
+		return vars;}
+	
+}
+
+
+Tipo Tipo():
+{}
+{
+	"int"{return new Int();} | "bool" {return new Bool();}
+}
+
+ArrayList<Comando> Sequcomandos():
+{ArrayList<Comando> comands = new ArrayList<Comando>(); Comando c;}
+{
+	(c = Comando(){comands.add(c);} Sequcomandos())?
+	{return comands;}
+}
+
+Comando Comando():
+{Comando co = new Comando(); String id; Exp e; ArrayList<Comando> arrayCo; ArrayList<Exp> arrayE = null;}
+{
+	id = TOKEN_id() (":=" e = Exp() ";" {Atribuicao a = new Atribuicao();  a.id = id; a.exp = e; return a;} 
+	| "(" (arrayE = Listaexp())? ")" ";" {Funcao f = new Funcao(); f.id = id; f.arrayExp = arrayE; return f;})
+	| "if" "(" e = Exp() ")" "{" arrayCo = Sequcomandos() "}" ";" {IF i = new IF(); i.exp = e; i.comandos = arrayCo; return i; }
+	| "while" "(" e = Exp() ")" "do" "{" arrayCo = Sequcomandos() "}" ";" {While w = new While(); w.exp = e; w.comandos = arrayCo; return w; }
+	| "do" "{" arrayCo = Sequcomandos() "}" "while" "(" e = Exp() ")" ";" {doWhile dw = new doWhile(); dw.exp = e; dw.comandos = arrayCo; return dw; }
+	| "return" e = Exp() ";" {Return r = new Return(); r.exp = e; return r;}
+	| "print" "(" e = Exp()  ")" ";" {Print p = new Print(); p.exp = e; return p;}
+}
+
+Exp Exp():
+{Exp e1 = null; ExpOp e2=null;}
+{
+	"(" e1 = Fator() e2 = Exp1() ")"
+	{if(e2 == null){
+		return e1;
+	}else{
+		/*
+		e3 = new ExpOp();
+		e3.e1 = e1;
+		e3.e2 = e2;
+		e3.Op = e2.Op;
+		return e3;
+		*/
+		e2.e1 = e1;
+		return e2;
+	}
+	}
+}
+
+ExpOp Exp1():
+{ExpOp e = new ExpOp();}
+{
+	(e.Op = Op() e.e1 = Fator() e.e2 = Exp1(){if(e.e2 == null){
+												e.e2 = e.e1;
+												return e;
+												}else{
+												return e;
+												}
+												})? {return null;}
+	
+}
+
+Fator Fator():
+{Fator f = new Fator(); String s; Token t;}
+{
+	s = TOKEN_id()("(" f.exp = Listaexp() ")")?{f.id = s;}
+	| s = TOKEN_numliteral() {f.id = s;}
+	| t = "true" {f.id = t.image;}
+	| t = "false" {f.id = t.image;}
+	{return f;}
+}
+
+String Op():
+{Token t;}
+{
+	t = "+" | t = "-" | t = "*" | t = "/" | t = "&&" | t = "||" | t = "<" | t = ">" | t = "=="
+	{return (String)t.image;}
+}
+
+ArrayList<Exp> Listaexp():
+{ArrayList<Exp> e = new ArrayList<Exp>(), e1 = null; Exp e2;}
+{
+	e2 = Exp() {e.add(e2);} e1 = Listaexp1()
+	{if (e1 != null){
+		for(int i = 0;i< e1.size();i++){
+			e.add(e1.get(i));
+		}
+	}return e;
+}
+}
+
+ArrayList<Exp> Listaexp1():
+{ArrayList<Exp> e = new ArrayList<Exp>(), e1; Exp e2;}
+{
+	("," e2 = Exp() e1 = Listaexp1()	{if (e1 != null){
+											for(int i = 0;i< e1.size();i++){
+												e.add(e1.get(i));
+											}
+										}return e;
+										})? {return null;}
+}
+
+Func Func():
+{Func c = new Func();}
+{
+	"function" c.tipo = Tipo() c.id = TOKEN_id() "(" (c.listaargs = ListaArg())? ")" "{" c.vardecls = VarDecl() c.comandos =  Sequcomandos() "}"
+	{return c;}
+}
+
+ListaArg ListaArg():
+{ListaArg l = new ListaArg(), l1 = null; Tipo t; String id;}
+{
+	t = Tipo() id = TOKEN_id() l1 = ListaArg1()
+	{l.tipos = new ArrayList<Tipo>(); l.ids = new ArrayList<String>();
+	 l.tipos.add(t); l.ids.add(id);
+	 if(l1 != null){
+	 	for(int i = 0; i < l1.tipos.size();i++){
+	 		l.tipos.add(l1.tipos.get(i));
+	 		l.ids.add(l1.ids.get(i));
+	 	}
+	 }
+	 return l;
+	 }
+}
+
+ListaArg ListaArg1():
+{ListaArg l = new ListaArg(), l1 = null; Tipo t; String id;}
+{
+	("," t = Tipo() id = TOKEN_id() l1 = ListaArg1() {l.tipos = new ArrayList<Tipo>(); l.ids = new ArrayList<String>();
+														l.tipos.add(t); l.ids.add(id);
+														if(l1 != null){
+															for(int i = 0; i < l1.tipos.size();i++){
+														 		l.tipos.add(l1.tipos.get(i));
+														 		l.ids.add(l1.ids.get(i));
+														 	}
+														}
+														return l;
+
+	})? {return null;}
+}

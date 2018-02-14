@@ -1,0 +1,11 @@
+main{
+var int ba_ta; var int ce_no;
+co((ba_ta),(ce_no));
+return (ba_ta);
+}
+
+function int co(int a, int b){
+if((a > b)){
+	a := (b + 43);
+};
+}

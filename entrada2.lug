@@ -1,0 +1,13 @@
+main{
+var bool a2; var int ca_ca; var bool be_lz;
+a2 := (true);
+ca_ca := (2234);
+be_lz := (333);
+while((a2)) do {
+	be_lz := (be_lz + ca_ca);
+	if((be+lz > 100000)){
+		a2 := (false);
+	};
+};
+return (be_lz);
+}
