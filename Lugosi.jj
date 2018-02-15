@@ -271,20 +271,21 @@ ExpOp Exp1():
 }
 
 Fator Fator():
-{Fator f = new Fator(); String s; Token t;}
+{Fator f = new Fator(); ArrayList<Exp> e = null; String s; Token t;}
 {
-	s = TOKEN_id()("(" f.exp = Listaexp() ")")?{f.id = s;}
-	| s = TOKEN_numliteral() {f.id = s;}
-	| t = "true" {f.id = t.image;}
-	| t = "false" {f.id = t.image;}
-	{return f;}
+	(s = TOKEN_id()("(" e = Listaexp() ")")? {if(e!= null){f.exp = e;}f.id = s; return f;}
+	| s = TOKEN_numliteral() {if(e!= null){f.exp = e;}f.id = s; return f;}
+	| t = "true" {s = (String)t.image;if(e!= null){f.exp = e;}f.id = s; return f;}
+	| t = "false" {s = (String)t.image;if(e!= null){f.exp = e;}f.id = s; return f;})
+	
+	/*{if(e!= null){f.exp = e;}f.id = s; return f;}*/
 }
 
 String Op():
 {Token t;}
 {
-	t = "+" | t = "-" | t = "*" | t = "/" | t = "&&" | t = "||" | t = "<" | t = ">" | t = "=="
-	{return (String)t.image;}
+	t = "+" {return t.image;}| t = "-" {return t.image;}| t = "*" {return t.image;}| t = "/" {return t.image;}| t = "&&" {return t.image;}| t = "||" {return t.image;}|
+	t = "<" {return t.image;}| t = ">" {return t.image;}| t = "==" {return t.image;}
 }
 
 ArrayList<Exp> Listaexp():
