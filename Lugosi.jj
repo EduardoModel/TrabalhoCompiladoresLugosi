@@ -189,7 +189,7 @@ class Lugosi {
 	}
 
 	static void comandoWhile(While c){
-		System.out.print("while(\n");
+		System.out.print("while(");
 		imprimeExp(c.exp);
 		System.out.print(") do {\n");
 		for(int i=0;i<c.comandos.size();i++)
@@ -316,9 +316,9 @@ SKIP :
 
 //Convenções léxicas
 String TOKEN_id():
-{String t, v=null, x=null; Token s;}
+{String t, c, v=null, x=null; Token s;}
 {
-	s = <LETRA> (v = Letraoudigito())? (x = Finalsublinhado())?
+	s = <LETRA> (c = Letraoudigito(){if(v == null){v = c;}else{v+=c;}})? (x = Finalsublinhado())?
 
 	{t = (String)s.image;
 	if(v != null){t+=v;}
@@ -368,10 +368,9 @@ String Expoente_opcional():
 }
 
 String Letraoudigito():
-{Token s; String t = "";}
+{Token s;}
 {
-	(s = <LETRA> {t+=s.image;}| s = <DIGITO>{t+=s.image;})
-	{return s.image;}
+	(s = <LETRA> {return s.image;}| s = <DIGITO>{return s.image;})
 }
 
 String Finalsublinhado():
