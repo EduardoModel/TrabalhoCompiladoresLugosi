@@ -107,27 +107,41 @@ class Lugosi {
 		// passar a árvore para o gerador de código
 		//geraCodigo(arvore);
 	}
-	 static void pprint(ArvoreLugosi prog)
-	 {System.out.print("main {");
-	 //Parte responsável por imprimir as declarações de variáveis
-	 for(int i=0;i<prog.main.VarDecls.size();i++){
+
+
+
+	static void pprint(ArvoreLugosi prog){
+		System.out.print("main {");
+	 	//Parte responsável por imprimir as declarações de variáveis
+	 	for(int i=0;i<prog.main.VarDecls.size();i++){
 	 	System.out.print("var ");
 	 	if(prog.main.VarDecls.get(i).tipo instanceof Int)
 	 		System.out.print("int ");
 	 	else
 	 		System.out.print("bool ");
 	 	System.out.print(prog.main.VarDecls.get(i).id+";");
-	 }
+	 	}
 
-	 //Parte resposável por imprimir os comandos
-	 for(int i=0;i<prog.main.Comandos.size();i++)
-	 	comandosSelect(prog.main.Comandos.get(i));
+		 //Parte resposável por imprimir os comandos
+		 for(int i=0;i<prog.main.Comandos.size();i++){
+		 	comandosSelect(prog.main.Comandos.get(i));
+		 }
+
+		 System.out.print("}\n");
+
+		 if(prog.funcs.size() > 0){
+		 	for(int i=0;i<prog.funcs.size();i++){
+		 		imprimeFunc(prog.funcs.get(i));
+		 	}
+		 }
 
 
-	 System.out.print("\n");
+
+
+		 System.out.print("\n");
 
 	}
-}
+	
 ///*
 	static void comandosSelect(Comando c){
 		if(c instanceof Atribuicao)
@@ -158,13 +172,43 @@ class Lugosi {
 		System.out.print(");\n");
 	}
 
-	static void comandoIf(Comando f){
+	static void comandoIf(Comando c){
 		System.out.print("if(");
 		imprimeExp(f.exp);
 		System.out.print("){\n");
-		for(int i=0;i<f.comandos.size();i++)
-			comandosSelect(f.comandos.get(i));
+		for(int i=0;i<c.comandos.size();i++)
+			comandosSelect(c.comandos.get(i));
 		System.out.print("};\n");
+	}
+
+	static void comandoWhile(Comando c){
+		System.out.print("while(\n");
+		imprimeExp(c.exp);
+		System.out.print(") do {\n");
+		for(int i=0;i<c.comandos.size();i++)
+			comandosSelect(c.comandos.get(i));
+		System.out.print("};\n");
+	}
+
+	static void comandodoWhile(Comando c){
+		System.out.print("do{\n");
+		for(int i=0;i<c.comandos.size();i++)
+			comandosSelect(c.comandos.get(i));
+		System.out.print("\n}while(");
+		imprimeExp(c.exp);
+		System.out.print(");\n");
+	}
+
+	static void comandoReturn(Comando c){
+		System.out.print("return ");
+		imprimeExp(c.exp);
+		System.out.print(";\n");
+	}
+
+	static void comandoPrint(Comando c){
+		System.out.print("print(");
+		imprimeExp(c.exp);
+		System.out.print(");\n");
 	}
 
 	static void imprimeExp(Exp e){
@@ -191,6 +235,53 @@ class Lugosi {
 		}
 		System.out.print(")");
 	}
+
+	static void imprimeFunc(Func f){
+		System.out.print("function");
+		if(f.tipo instanceof Int)
+			System.out.print(" int ");
+		else
+			System.out.print(" bool ");
+		System.out.print(f.id+"(");
+
+
+		for(int i=0;i<f.listaargs.ids.size();i++){
+			if(f.listaargs.tipos.get(i) instanceof Int)
+				System.out.print("int ");
+			else
+				System.out.print("bool ");
+
+			System.out.print(f.listaargs.ids.get(i));
+			if(i != f.listaargs.ids.size()-1)
+				System.out.print(", ");
+		}
+
+		System.out.print("){\n");
+
+		for(int i=0;i<f.vardecls.size();i++){
+			if(f.vardecls.get(i).tipo instanceof Int)
+				System.out.print("int ");
+			else
+				System.out.print("bool ");
+			System.out.print(f.vardecls.get(i).id+"; ");
+		}
+
+		System.out.print("\n");
+
+		for(int i=0;i<f.comandos.size();i++){
+			comandosSelect(f.comandos.get(i));
+		}
+
+		System.out.print("\n}");
+	}
+
+
+
+
+
+
+
+
 
 	 static void geraCodigo(ArvoreLugosi prog){}
 	
