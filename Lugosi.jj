@@ -368,9 +368,9 @@ String Expoente_opcional():
 }
 
 String Letraoudigito():
-{Token s;}
+{Token s; String t = "";}
 {
-	s = <LETRA> {return s.image;}| s = <DIGITO>
+	(s = <LETRA> {t+=s.image;}| s = <DIGITO>{t+=s.image;})
 	{return s.image;}
 }
 
@@ -384,9 +384,10 @@ String Finalsublinhado():
 //Regras da gramática
 
 ArvoreLugosi Lugosi():
-{ArvoreLugosi ar = new ArvoreLugosi(); Func f;}
+{ArvoreLugosi ar = new ArvoreLugosi(); Func f;ar.funcs = new ArrayList<Func>();}
 {
-	ar.main = Main() (f =  Func(){ar.funcs.add(f);})?
+
+	ar.main = Main() (f = Func(){ar.funcs.add(f);})?
 	{return ar;}
 }
 
