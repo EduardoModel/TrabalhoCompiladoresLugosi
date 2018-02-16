@@ -102,7 +102,7 @@ class Lugosi {
 		ArvoreLugosi arvore = parser.Lugosi();
 
 		// Passar a árvore para o prety printer:
-		//pprint(arvore);
+		pprint(arvore);
 		
 		// passar a árvore para o gerador de código
 		//geraCodigo(arvore);
@@ -111,7 +111,7 @@ class Lugosi {
 
 
 	static void pprint(ArvoreLugosi prog){
-		System.out.print("main {");
+		System.out.print("\nmain {\n");
 	 	//Parte responsável por imprimir as declarações de variáveis
 	 	for(int i=0;i<prog.main.VarDecls.size();i++){
 	 	System.out.print("var ");
@@ -121,6 +121,7 @@ class Lugosi {
 	 		System.out.print("bool ");
 	 	System.out.print(prog.main.VarDecls.get(i).id+";");
 	 	}
+	 	System.out.print("\n");
 
 		 //Parte resposável por imprimir os comandos
 		 for(int i=0;i<prog.main.Comandos.size();i++){
@@ -129,11 +130,13 @@ class Lugosi {
 
 		 System.out.print("}\n");
 
-		 if(prog.funcs.size() > 0){
-		 	for(int i=0;i<prog.funcs.size();i++){
-		 		imprimeFunc(prog.funcs.get(i));
-		 	}
-		 }
+		 if(prog.funcs != null){
+			 if(prog.funcs.size() > 0){
+			 	for(int i=0;i<prog.funcs.size();i++){
+			 		imprimeFunc(prog.funcs.get(i));
+			 	}
+			 }
+		}	 
 
 
 
@@ -145,43 +148,47 @@ class Lugosi {
 ///*
 	static void comandosSelect(Comando c){
 		if(c instanceof Atribuicao)
-			comandoAtribuicao(c);
+			comandoAtribuicao((Atribuicao)c);
 		else if(c instanceof Funcao)
-			comandoFuncao(c);
+			comandoFuncao((Funcao)c);
 		else if(c instanceof IF)
-	 		comandoIf(c);
+	 		comandoIf((IF)c);
 	 	else if(c instanceof While)
-	 		comandoWhile(c);
+	 		comandoWhile((While)c);
 	 	else if(c instanceof doWhile)
-	 		comandodoWhile(c);
+	 		comandodoWhile((doWhile)c);
 	 	else if(c instanceof Return)
-	 		comandoReturn(c);
+	 		comandoReturn((Return)c);
 	 	else
-	 		comandoPrint(c);	
+	 		comandoPrint((Print)c);	
 	}
 
-	static void comandoAtribuicao(Comando c){
+	static void comandoAtribuicao(Atribuicao c){
 		System.out.print(c.id+ " := ");
 		imprimeExp(c.exp);
 		System.out.print(";\n");
 	}
 
-	static void comandoFuncao(Comando c){
+	static void comandoFuncao(Funcao c){
 		System.out.print(c.id+ "(");
-		imprime(e.exp);
+		for(int i=0;i<c.arrayExp.size();i++){
+			imprimeExp(c.arrayExp.get(i));
+			if(i<c.arrayExp.size()-1)
+				System.out.print(", ");
+		}
 		System.out.print(");\n");
 	}
 
-	static void comandoIf(Comando c){
+	static void comandoIf(IF c){
 		System.out.print("if(");
-		imprimeExp(f.exp);
+		imprimeExp(c.exp);
 		System.out.print("){\n");
 		for(int i=0;i<c.comandos.size();i++)
 			comandosSelect(c.comandos.get(i));
 		System.out.print("};\n");
 	}
 
-	static void comandoWhile(Comando c){
+	static void comandoWhile(While c){
 		System.out.print("while(\n");
 		imprimeExp(c.exp);
 		System.out.print(") do {\n");
@@ -190,7 +197,7 @@ class Lugosi {
 		System.out.print("};\n");
 	}
 
-	static void comandodoWhile(Comando c){
+	static void comandodoWhile(doWhile c){
 		System.out.print("do{\n");
 		for(int i=0;i<c.comandos.size();i++)
 			comandosSelect(c.comandos.get(i));
@@ -199,13 +206,13 @@ class Lugosi {
 		System.out.print(");\n");
 	}
 
-	static void comandoReturn(Comando c){
+	static void comandoReturn(Return c){
 		System.out.print("return ");
 		imprimeExp(c.exp);
 		System.out.print(";\n");
 	}
 
-	static void comandoPrint(Comando c){
+	static void comandoPrint(Print c){
 		System.out.print("print(");
 		imprimeExp(c.exp);
 		System.out.print(");\n");
@@ -213,25 +220,34 @@ class Lugosi {
 
 	static void imprimeExp(Exp e){
 		System.out.print("(");
+		Fator f;
+		ExpOp eo;
 		if(e instanceof Fator){
-			System.out.print(e.id);
-			if(!e.exp.size()){
-				for(int i = 0;i<e.exp.size();i++){
-					imprimeExp(e.exp.get(i));
-					System.out.print(", ");
+			f = (Fator)e;
+			System.out.print(f.id);
+			if(f.exp != null){
+				if(f.exp.size() > 0){
+					for(int i = 0;i<f.exp.size();i++){
+						imprimeExp(f.exp.get(i));
+						System.out.print(", ");
+					}
 				}
 			}	
 		}
 		else{
-			System.out.print(e.e1.id);
-			if(!e.e1.exp.size()){
-				for(int i = 0;i<e.exp.size();i++){
-					imprimeExp(e.e1.exp.get(i));
-					System.out.print(", ");
+			eo = (ExpOp)e;
+			f = (Fator)eo.e1;
+			System.out.print(f.id);
+			if(f.exp != null){
+				if(f.exp.size() > 0){
+					for(int i = 0;i<f.exp.size();i++){
+						imprimeExp(f.exp.get(i));
+						System.out.print(", ");
+					}
 				}
 			}
-			System.out.print(" " + e.op + " ");
-			imprimeExp(e.e2);
+			System.out.print(" " + eo.Op + " ");
+			imprimeExp(eo.e2);
 		}
 		System.out.print(")");
 	}
@@ -300,17 +316,26 @@ SKIP :
 
 //Convenções léxicas
 String TOKEN_id():
-{String t; Token s;}
+{String t, v=null, x=null; Token s;}
 {
-	s = <LETRA> (Letraoudigito())? (Finalsublinhado())?
-	{t = (String)s.image; return t;}
+	s = <LETRA> (v = Letraoudigito())? (x = Finalsublinhado())?
+
+	{t = (String)s.image;
+	if(v != null){t+=v;}
+	if(x != null){t+=x;}
+	return t;}
 }
 
 String TOKEN_numliteral():
 {String t, s, h, i;}
 {
 	s = Digitos() h = Facao_opcional() i = Expoente_opcional()
-	{t = s + h + i; return t;}
+	{t = s;
+	if(h != null)
+		t+=h;
+	if(i != null)
+		t+=i;
+	return t;}
 }
 
 TOKEN :
@@ -420,13 +445,6 @@ Exp Exp():
 	{if(e2 == null){
 		return e1;
 	}else{
-		/*
-		e3 = new ExpOp();
-		e3.e1 = e1;
-		e3.e2 = e2;
-		e3.Op = e2.Op;
-		return e3;
-		*/
 		e2.e1 = e1;
 		return e2;
 	}
