@@ -420,10 +420,17 @@ Tipo Tipo():
 }
 
 ArrayList<Comando> Sequcomandos():
-{ArrayList<Comando> comands = new ArrayList<Comando>(); Comando c;}
+{ArrayList<Comando> comands = new ArrayList<Comando>(), cm1 = null; Comando c;}
 {
-	(c = Comando(){comands.add(c);} Sequcomandos())?
-	{return comands;}
+	(c = Comando(){comands.add(c);} cm1 = Sequcomandos())?
+
+	{if(cm1 != null){
+		for(int i = 0;i<cm1.size();i++)
+			comands.add(cm1.get(i));
+
+
+	}
+	return comands;}
 }
 
 Comando Comando():
