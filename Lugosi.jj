@@ -107,8 +107,51 @@ class Lugosi {
 		// passar a árvore para o gerador de código
 		//geraCodigo(arvore);
 	}
-	 static void pprint(ArvoreLugosi prog){}
+	 static void pprint(ArvoreLugosi prog)
+	 {System.out.print("main {");
+	 //Parte responsável por imprimir as declarações de variáveis
+	 for(int i=0;i<prog.main.VarDecls.size();i++){
+	 	System.out.print("var ");
+	 	if(prog.main.VarDecls.get(i).tipo instanceof Int)
+	 		System.out.print("int ");
+	 	else
+	 		System.out.print("bool ");
+	 	System.out.print(prog.main.VarDecls.get(i).id+";");
+	 }
+
+	 //Parte resposável por imprimir os comandos
+	 for(int i=0;i<prog.main.Comandos.size();i++){
+	 	if(prog.main.Comandos.get(i) instanceof IF)
+	 		//comandoif(prog.main.Comandos.get(i));
+
+
+
+
+
+
+
+
+	 System.out.print("\n");
+
+	}
+}
+/*
+	static void comandoif(Comando f){
+		System.out.print("if(");
+	 	if(f.exp instanceof Fator){
+	 		System.out.print("(" + f.exp.id);
+	 		if(!f.exp.size()){
+	 			for(int j=0;j<f.exp.exp.size();j++){
+	 				if(f.exp.exp.get(j) instanceof Fator)
+	 					System.out.print("("+f.exp.exp.get(j).id+")");
+	 					}
+	 				}
+	 			}
+
+	}*/
+
 	 static void geraCodigo(ArvoreLugosi prog){}
+	
 }
 
 
@@ -169,7 +212,7 @@ String Expoente_opcional():
 String Letraoudigito():
 {Token s;}
 {
-	s = <LETRA> | s = <DIGITO>
+	s = <LETRA> {return s.image;}| s = <DIGITO>
 	{return s.image;}
 }
 
