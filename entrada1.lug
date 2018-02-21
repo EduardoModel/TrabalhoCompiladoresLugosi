@@ -1,5 +1,5 @@
 main {
-var int a; var int b;
+var int abcd3_33da3; var int b;
 if ((a < b)){
 	print((true));		
 };
