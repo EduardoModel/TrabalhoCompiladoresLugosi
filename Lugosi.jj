@@ -318,7 +318,7 @@ SKIP :
 String TOKEN_id():
 {String t, c, v=null, x=null; Token s;}
 {
-	s = <LETRA> (c = Letraoudigito(){if(v == null){v = c;}else{v+=c;}})? (x = Finalsublinhado())?
+	s = <LETRA> (c = Letraoudigito(){if(v == null){v = c;}else{v+=c;}})* (x = Finalsublinhado())?
 
 	{t = (String)s.image;
 	if(v != null){t+=v;}
